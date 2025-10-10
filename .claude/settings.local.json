@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:developers.esphome.io)",
+      "WebFetch(domain:esphome.io)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(mkdir:*)",
+      "Bash(tree:*)",
+      "Bash(python -m pip show:*)",
+      "Bash(echo $PATH)",
+      "Read(//c/Users/mathi/AppData/Local/Packages/**)",
+      "Bash(python -m esphome:*)",
+      "Read(//c/Projects/**)",
+      "Bash(tasklist)",
+      "Bash(g++:*)",
+      "Bash(./test_meter_id)",
+      "WebFetch(domain:community.home-assistant.io)",
+      "Bash(findstr:*)",
+      "Bash(timeout 60 python -m esphome logs example.yaml --device COM13)",
+      "Bash(timeout 30 python -m esphome logs:*)",
+      "Bash(tee:*)",
+      "Bash(python:*)",
+      "Bash(timeout 60 python -m esphome logs:*)",
+      "Bash(timeout 120 python -m esphome logs:*)",
+      "Bash(timeout 10 python -m esphome logs:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Read(//c/tmp/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

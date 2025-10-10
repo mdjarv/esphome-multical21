@@ -1,0 +1,149 @@
+INFO ESPHome 2025.7.5
+INFO Reading configuration example.yaml...
+INFO Generating C++ source...
+INFO Compiling app...
+Processing water-meter (board: esp32-c3-devkitm-1; framework: arduino; platform: https://github.com/pioarduino/platform-espressif32/releases/download/53.03.13/platform-espressif32.zip)
+--------------------------------------------------------------------------------
+HARDWARE: ESP32C3 160MHz, 320KB RAM, 4MB Flash
+ - framework-arduinoespressif32 @ 3.1.3 
+ - framework-arduinoespressif32-libs @ 5.3.0+sha.489d7a2b3a 
+ - tool-esptoolpy @ 4.8.6 
+ - tool-mklittlefs @ 3.2.0 
+ - tool-riscv32-esp-elf-gdb @ 14.2.0+20240403 
+ - tool-xtensa-esp-elf-gdb @ 14.2.0+20240403 
+ - toolchain-riscv32-esp @ 13.2.0+20240530
+Dependency Graph
+|-- Networking @ 3.1.3
+|-- AsyncTCP @ 3.4.5
+|-- WiFi @ 3.1.3
+|-- FS @ 3.1.3
+|-- Update @ 3.1.3
+|-- ESPAsyncWebServer @ 3.7.10
+|-- ESP32 Async UDP @ 3.1.3
+|-- DNSServer @ 3.1.3
+|-- ESPmDNS @ 3.1.3
+|-- noise-c @ 0.1.10
+|-- SPI @ 3.1.3
+|-- ArduinoJson @ 7.4.2
+Compiling .pioenvs\water-meter\src\esphome\components\multical21_wmbus\cc1101_radio.cpp.o
+Compiling .pioenvs\water-meter\src\esphome\components\multical21_wmbus\multical21_wmbus.cpp.o
+Compiling .pioenvs\water-meter\src\main.cpp.o
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:114:6: error: no declaration matches 'bool esphome::multical21_wmbus::Multical21WMBusComponent::read_packet_from_fifo_(uint8_t*, uint8_t&)'
+  114 | bool Multical21WMBusComponent::read_packet_from_fifo_(uint8_t *buffer, uint8_t &length) {
+      |      ^~~~~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:114:6: note: no functions named 'bool esphome::multical21_wmbus::Multical21WMBusComponent::read_packet_from_fifo_(uint8_t*, uint8_t&)'
+In file included from src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:1:
+src/esphome/components/multical21_wmbus/multical21_wmbus.h:18:7: note: 'class esphome::multical21_wmbus::Multical21WMBusComponent' defined here
+   18 | class Multical21WMBusComponent : public PollingComponent, public spi::SPIDevice<spi::BIT_ORDER_MSB_FIRST,
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:148:6: error: no declaration matches 'bool esphome::multical21_wmbus::Multical21WMBusComponent::read_fifo_into_packet_buffer_()'
+  148 | bool Multical21WMBusComponent::read_fifo_into_packet_buffer_() {
+      |      ^~~~~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:148:6: note: no functions named 'bool esphome::multical21_wmbus::Multical21WMBusComponent::read_fifo_into_packet_buffer_()'
+src/esphome/components/multical21_wmbus/multical21_wmbus.h:18:7: note: 'class esphome::multical21_wmbus::Multical21WMBusComponent' defined here
+   18 | class Multical21WMBusComponent : public PollingComponent, public spi::SPIDevice<spi::BIT_ORDER_MSB_FIRST,
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:172:6: error: no declaration matches 'void esphome::multical21_wmbus::Multical21WMBusComponent::process_buffered_packets_()'
+  172 | void Multical21WMBusComponent::process_buffered_packets_() {
+      |      ^~~~~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:172:6: note: no functions named 'void esphome::multical21_wmbus::Multical21WMBusComponent::process_buffered_packets_()'
+src/esphome/components/multical21_wmbus/multical21_wmbus.h:18:7: note: 'class esphome::multical21_wmbus::Multical21WMBusComponent' defined here
+   18 | class Multical21WMBusComponent : public PollingComponent, public spi::SPIDevice<spi::BIT_ORDER_MSB_FIRST,
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:183:6: error: no declaration matches 'bool esphome::multical21_wmbus::Multical21WMBusComponent::validate_packet_structure_(const uint8_t*, uint8_t, uint8_t)'
+  183 | bool Multical21WMBusComponent::validate_packet_structure_(const uint8_t *packet_data, uint8_t length, uint8_t packet_length) {
+      |      ^~~~~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:183:6: note: no functions named 'bool esphome::multical21_wmbus::Multical21WMBusComponent::validate_packet_structure_(const uint8_t*, uint8_t, uint8_t)'
+src/esphome/components/multical21_wmbus/multical21_wmbus.h:18:7: note: 'class esphome::multical21_wmbus::Multical21WMBusComponent' defined here
+   18 | class Multical21WMBusComponent : public PollingComponent, public spi::SPIDevice<spi::BIT_ORDER_MSB_FIRST,
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:199:6: error: no declaration matches 'bool esphome::multical21_wmbus::Multical21WMBusComponent::verify_packet_crc_(const uint8_t*, uint8_t)'
+  199 | bool Multical21WMBusComponent::verify_packet_crc_(const uint8_t *packet_data, uint8_t length) {
+      |      ^~~~~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:199:6: note: no functions named 'bool esphome::multical21_wmbus::Multical21WMBusComponent::verify_packet_crc_(const uint8_t*, uint8_t)'
+src/esphome/components/multical21_wmbus/multical21_wmbus.h:18:7: note: 'class esphome::multical21_wmbus::Multical21WMBusComponent' defined here
+   18 | class Multical21WMBusComponent : public PollingComponent, public spi::SPIDevice<spi::BIT_ORDER_MSB_FIRST,
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:214:6: error: no declaration matches 'bool esphome::multical21_wmbus::Multical21WMBusComponent::decrypt_packet_payload_(const uint8_t*, uint8_t, uint8_t*, uint8_t&)'
+  214 | bool Multical21WMBusComponent::decrypt_packet_payload_(const uint8_t *packet_data, uint8_t length,
+      |      ^~~~~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:214:6: note: no functions named 'bool esphome::multical21_wmbus::Multical21WMBusComponent::decrypt_packet_payload_(const uint8_t*, uint8_t, uint8_t*, uint8_t&)'
+src/esphome/components/multical21_wmbus/multical21_wmbus.h:18:7: note: 'class esphome::multical21_wmbus::Multical21WMBusComponent' defined here
+   18 | class Multical21WMBusComponent : public PollingComponent, public spi::SPIDevice<spi::BIT_ORDER_MSB_FIRST,
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp: In member function 'virtual void esphome::multical21_wmbus::Multical21WMBusComponent::loop()':
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:242:14: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'read_fifo_into_packet_buffer_'
+  242 |   if (!this->read_fifo_into_packet_buffer_()) {
+      |              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:265:9: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'process_buffered_packets_'
+  265 |   this->process_buffered_packets_();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp: In member function 'void esphome::multical21_wmbus::Multical21WMBusComponent::process_fifo_data_(uint8_t, bool)':
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:381:11: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'start_receiver_'
+  381 |     this->start_receiver_();  // This flushes and restarts
+      |           ^~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:388:11: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'start_receiver_'
+  388 |     this->start_receiver_();  // Flush and restart
+      |           ^~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:393:9: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'send_strobe_'
+  393 |   this->send_strobe_(CC1101_SIDLE);
+      |         ^~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:398:30: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'read_fifo_byte_'
+  398 |   uint8_t preamble_1 = this->read_fifo_byte_();
+      |                              ^~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:399:30: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'read_fifo_byte_'
+  399 |   uint8_t preamble_2 = this->read_fifo_byte_();
+      |                              ^~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:404:26: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'read_fifo_byte_'
+  404 |   uint8_t length = this->read_fifo_byte_();
+      |                          ^~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:409:11: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'start_receiver_'
+  409 |     this->start_receiver_();
+      |           ^~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:420:27: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'read_fifo_byte_'
+  420 |     packet[i + 1] = this->read_fifo_byte_();
+      |                           ^~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:521:11: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'process_our_meter_packet_'
+  521 |     this->process_our_meter_packet_(packet, length + 1);
+      |           ^~~~~~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:528:9: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'start_receiver_'
+  528 |   this->start_receiver_();
+      |         ^~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp: In member function 'void esphome::multical21_wmbus::Multical21WMBusComponent::process_packet_(const uint8_t*, uint8_t)':
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:536:14: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'validate_packet_structure_'
+  536 |   if (!this->validate_packet_structure_(packet_data, length, packet_length)) {
+      |              ^~~~~~~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:556:14: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'verify_packet_crc_'
+  556 |   if (!this->verify_packet_crc_(packet_data, length)) {
+      |              ^~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:563:14: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'decrypt_packet_payload_'
+  563 |   if (!this->decrypt_packet_payload_(packet_data, length, plaintext, plaintext_length)) {
+      |              ^~~~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp: In member function 'void esphome::multical21_wmbus::Multical21WMBusComponent::check_radio_health_()':
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:610:29: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'read_status_register_'
+  610 |   uint8_t marcstate = this->read_status_register_(CC1101_MARCSTATE);
+      |                             ^~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:611:27: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'read_status_register_'
+  611 |   uint8_t rxbytes = this->read_status_register_(CC1101_RXBYTES);
+      |                           ^~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:623:11: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'send_strobe_'
+  623 |     this->send_strobe_(CC1101_SIDLE);
+      |           ^~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:631:28: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'read_fifo_byte_'
+  631 |       raw_bytes[i] = this->read_fifo_byte_();
+      |                            ^~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:749:11: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'start_receiver_'
+  749 |     this->start_receiver_();
+      |           ^~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp: In member function 'void esphome::multical21_wmbus::Multical21WMBusComponent::log_radio_status_()':
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:755:29: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'read_status_register_'
+  755 |   uint8_t marcstate = this->read_status_register_(CC1101_MARCSTATE);
+      |                             ^~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:756:27: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'read_status_register_'
+  756 |   uint8_t rxbytes = this->read_status_register_(CC1101_RXBYTES);
+      |                           ^~~~~~~~~~~~~~~~~~~~~
+src/esphome/components/multical21_wmbus/multical21_wmbus.cpp:767:11: error: 'class esphome::multical21_wmbus::Multical21WMBusComponent' has no member named 'start_receiver_'
+  767 |     this->start_receiver_();
+      |           ^~~~~~~~~~~~~~~
+*** [.pioenvs\water-meter\src\esphome\components\multical21_wmbus\multical21_wmbus.cpp.o] Error 1
+========================== [FAILED] Took 6.92 seconds ==========================

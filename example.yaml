@@ -1,0 +1,67 @@
+esphome:
+  name: water-meter
+  friendly_name: Water Meter
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: arduino
+
+logger:
+  level: DEBUG
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "Water Meter Fallback"
+    password: "fallback12345"
+
+captive_portal:
+
+web_server:
+  port: 80
+
+spi:
+  clk_pin: 4
+  mosi_pin: 6
+  miso_pin: 5
+
+external_components:
+  - source:
+      type: local
+      path: components
+
+sensor:
+  - platform: multical21_wmbus
+    id: water_meter_component
+    cs_pin: 7
+    gdo0_pin: 3
+    meter_id: !secret meter_id
+    aes_key: !secret aes_key
+
+    total_consumption:
+      name: "Water Total"
+
+    target_consumption:
+      name: "Water Target"
+
+    flow_temperature:
+      name: "Flow Temperature"
+
+    ambient_temperature:
+      name: "Ambient Temperature"
+
+text_sensor:
+  - platform: multical21_wmbus
+    multical21_wmbus_id: water_meter_component
+    info_codes:
+      name: "Meter Status"
