@@ -72,23 +72,15 @@ void CC1101Radio::init(Multical21WMBusComponent *component) {
 // ============================================================================
 
 void CC1101Radio::wait_for_miso_low_() {
-  // Wait for MISO to go LOW (indicates chip ready)
-  // Per CC1101 datasheet: MISO (SO) goes LOW when chip is ready for communication
-  // The working reference implementation actively polls MISO - we do the same
+  // ESPHome SPI driver handles MISO state internally
+  // Unlike the reference implementation which uses raw SPI.transfer(),
+  // ESPHome's spi->read_byte() already waits for chip ready
   //
-  // CRITICAL: In ESPHome SPI, MISO is GPIO5 (from example.yaml: miso_pin: 5)
-  // We poll it directly to match the working implementation exactly
-  const uint8_t MISO_PIN = 5;  // ESP32-C3 MISO pin
-
-  // Poll MISO with timeout to prevent infinite loops
-  uint16_t timeout = 1000;  // ~1ms max wait
-  while (digitalRead(MISO_PIN) == HIGH && timeout-- > 0) {
-    delayMicroseconds(1);
-  }
-
-  if (timeout == 0) {
-    ESP_LOGW(RADIO_TAG, "MISO wait timeout - chip may not be ready");
-  }
+  // Attempting to digitalRead(MISO) when it's configured for SPI causes errors:
+  // "IO 5 is not set as GPIO"
+  //
+  // Solution: Just add a small delay to ensure chip is ready
+  delayMicroseconds(10);
 }
 
 void CC1101Radio::send_strobe_(uint8_t strobe) {
@@ -146,6 +138,33 @@ void CC1101Radio::start_rx() {
   // Note: This is called frequently (after every packet), so we keep logging minimal
   // Only log errors, not normal operation
 
+  // Check current state before trying to change it
+  uint8_t current_state = this->read_status_register(CC1101_MARCSTATE);
+
+  // If already in overflow state (0x11), handle it specially
+  if (current_state == MARCSTATE_RXFIFO_OVERFLOW) {
+    ESP_LOGW(RADIO_TAG, "Radio in OVERFLOW state (0x11), performing IDLE->FLUSH->RX sequence");
+    // Enter IDLE first to clear overflow condition
+    this->send_strobe_(CC1101_SIDLE);
+    delay(2);
+    // Flush both RX and TX FIFOs
+    this->send_strobe_(CC1101_SFRX);
+    delay(1);
+    this->send_strobe_(CC1101_SFTX);
+    delay(1);
+    // Now can safely enter RX
+    this->send_strobe_(CC1101_SRX);
+    delay(10);
+
+    uint8_t final_state = this->read_status_register(CC1101_MARCSTATE);
+    if (final_state != MARCSTATE_RX) {
+      ESP_LOGE(RADIO_TAG, "Failed to recover from overflow! State=0x%02X", final_state);
+      this->reset();
+      this->configure();
+    }
+    return;
+  }
+
   // Enter IDLE state
   this->send_strobe_(CC1101_SIDLE);
 
@@ -153,7 +172,8 @@ void CC1101Radio::start_rx() {
   uint8_t regCount = 0;
   while (this->read_status_register(CC1101_MARCSTATE) != MARCSTATE_IDLE) {
     if (regCount++ > 100) {
-      ESP_LOGE(RADIO_TAG, "Failed to enter IDLE state!");
+      uint8_t stuck_state = this->read_status_register(CC1101_MARCSTATE);
+      ESP_LOGE(RADIO_TAG, "Failed to enter IDLE state! Stuck in state 0x%02X (was 0x%02X)", stuck_state, current_state);
       // Reset and try again
       this->reset();
       this->configure();
@@ -162,18 +182,34 @@ void CC1101Radio::start_rx() {
     delay(1);
   }
 
-  // Flush RX FIFO
+  // Flush RX FIFO - CRITICAL: Must wait for flush to complete!
   this->send_strobe_(CC1101_SFRX);
-  delay(5);
+  delay(5);  // Give FIFO time to flush completely
+
+  // Verify FIFO is actually empty
+  uint8_t rxbytes_after_flush = this->read_status_register(CC1101_RXBYTES);
+  if ((rxbytes_after_flush & 0x7F) != 0) {
+    ESP_LOGW(RADIO_TAG, "FIFO not empty after flush! RXbytes=%u, attempting second flush", rxbytes_after_flush & 0x7F);
+    this->send_strobe_(CC1101_SFRX);
+    delay(5);
+  }
 
   // Enter RX state
   regCount = 0;
   this->send_strobe_(CC1101_SRX);
-  delay(10);
+  delay(10);  // Give time to enter RX mode
 
+  // Wait for RX state with timeout
   while (this->read_status_register(CC1101_MARCSTATE) != MARCSTATE_RX) {
     if (regCount++ > 100) {
-      ESP_LOGE(RADIO_TAG, "Failed to enter RX state!");
+      uint8_t stuck_state = this->read_status_register(CC1101_MARCSTATE);
+      ESP_LOGE(RADIO_TAG, "Failed to enter RX state! Stuck in state 0x%02X", stuck_state);
+
+      // Check if it's an overflow condition
+      if (stuck_state == MARCSTATE_RXFIFO_OVERFLOW) {
+        ESP_LOGW(RADIO_TAG, "Detected overflow (0x11) while entering RX - need full reset");
+      }
+
       // Reset and try again
       this->reset();
       this->configure();

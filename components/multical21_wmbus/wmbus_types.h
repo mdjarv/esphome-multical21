@@ -34,6 +34,7 @@ constexpr uint8_t CC1101_SCAL = 0x33;   // Calibrate frequency synthesizer
 constexpr uint8_t CC1101_SRX = 0x34;    // Enable RX
 constexpr uint8_t CC1101_SIDLE = 0x36;  // Exit RX/TX
 constexpr uint8_t CC1101_SFRX = 0x3A;   // Flush RX FIFO
+constexpr uint8_t CC1101_SFTX = 0x3B;   // Flush TX FIFO
 constexpr uint8_t CC1101_RXFIFO = 0x3F; // RX FIFO access
 
 // ============================================================================
@@ -45,13 +46,14 @@ constexpr uint8_t CC1101_RSSI = 0x34;       // RSSI value
 constexpr uint8_t CC1101_RXBYTES = 0x3B;    // RX FIFO bytes
 
 // ============================================================================
-// MARCSTATE Values (from CC1101 datasheet Table 31)
+// MARCSTATE Values (from WMBUS_IMPLEMENTATION_SPEC.md Section 10.2)
 // ============================================================================
 
 constexpr uint8_t MARCSTATE_IDLE = 0x01;
-constexpr uint8_t MARCSTATE_RX = 0x0F;             // Receiving (correct value)
-constexpr uint8_t MARCSTATE_RXFIFO_OVERFLOW = 0x11;
-constexpr uint8_t MARCSTATE_RX_OVERFLOW = 0x0D;    // RX overflow state
+constexpr uint8_t MARCSTATE_RX = 0x0D;              // Receive mode (CORRECT per spec!)
+constexpr uint8_t MARCSTATE_RX_END = 0x0E;          // End of packet
+constexpr uint8_t MARCSTATE_RX_RST = 0x0F;          // RX termination
+constexpr uint8_t MARCSTATE_RXFIFO_OVERFLOW = 0x11; // FIFO overflow (ERROR state)
 
 // ============================================================================
 // Read/Write Masks for Register Access

@@ -12,3 +12,4 @@
 - Successfully receives, decodes, and posts data from the Multical21 water meter
 - Use as reference for protocol handling, but NOT for ESPHome component architecture
 - Goal: Port this functionality to ESPHome framework following ESPHome best practices
+- Don't run the esphome logs command, instead ask the user to paste logs

@@ -188,12 +188,15 @@ bool Multical21WMBusComponent::read_fifo_into_packet_buffer_() {
     return false;
   }
 
-  // CRITICAL: Do NOT enter IDLE before reading FIFO!
-  // The working reference implementation reads FIFO immediately while radio is in RX/RX_END state.
-  // Entering IDLE first can clear the FIFO or reset pointers, losing the packet data.
-  // Reference: esp-multical21/src/WaterMeter.cpp receive() function line 627-704
+  // CRITICAL: Enter IDLE state BEFORE reading FIFO to prevent overflow condition!
+  // Reading FIFO while in RX state can cause MARCSTATE 0x0D (RX_FIFO_OVERFLOW)
+  // The FIFO contents are preserved when entering IDLE state.
+  this->radio_.enter_idle();
 
-  // Read packet from FIFO (while radio is still in RX or RX_END state)
+  // Small delay to ensure state transition completes
+  delayMicroseconds(100);
+
+  // Read packet from FIFO (while radio is in IDLE state)
   PacketBuffer pkt;
   uint8_t length;
   if (!this->read_packet_from_fifo_(pkt.data, length)) {
@@ -516,14 +519,15 @@ void Multical21WMBusComponent::log_radio_status_() {
            this->packets_received_, this->packet_ready_ ? "YES" : "no", rssi_dbm);
 
   // Check if radio is in wrong state or overflow
-  if (marcstate == MARCSTATE_RX_OVERFLOW || overflow) {
+  if (marcstate == MARCSTATE_RXFIFO_OVERFLOW || overflow) {
     ESP_LOGW(TAG, "Radio in OVERFLOW state (MARC=0x%02X, overflow=%s) - restarting",
              marcstate, overflow ? "YES" : "no");
     this->radio_.enter_idle();
     this->radio_.flush_rx_fifo();
     this->radio_.start_rx();
   } else if (marcstate != MARCSTATE_RX) {
-    ESP_LOGW(TAG, "Radio not in RX mode (state=0x%02X) - restarting", marcstate);
+    ESP_LOGW(TAG, "Radio not in RX mode (state=0x%02X, expected 0x%02X) - restarting",
+             marcstate, MARCSTATE_RX);
     this->radio_.start_rx();
   }
 }
