@@ -99,7 +99,7 @@ external_components:
   - source:
       type: git
       url: https://github.com/mdjarv/esphome-multical21
-      ref: main
+      ref: master
     components: [ multical21_wmbus ]
 
 # Required: SPI bus configuration

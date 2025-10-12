@@ -73,8 +73,22 @@ void CC1101Radio::init(Multical21WMBusComponent *component) {
 
 void CC1101Radio::wait_for_miso_low_() {
   // Wait for MISO to go LOW (indicates chip ready)
-  // In ESPHome, we add a small delay instead
-  delayMicroseconds(10);
+  // Per CC1101 datasheet: MISO (SO) goes LOW when chip is ready for communication
+  // The working reference implementation actively polls MISO - we do the same
+  //
+  // CRITICAL: In ESPHome SPI, MISO is GPIO5 (from example.yaml: miso_pin: 5)
+  // We poll it directly to match the working implementation exactly
+  const uint8_t MISO_PIN = 5;  // ESP32-C3 MISO pin
+
+  // Poll MISO with timeout to prevent infinite loops
+  uint16_t timeout = 1000;  // ~1ms max wait
+  while (digitalRead(MISO_PIN) == HIGH && timeout-- > 0) {
+    delayMicroseconds(1);
+  }
+
+  if (timeout == 0) {
+    ESP_LOGW(RADIO_TAG, "MISO wait timeout - chip may not be ready");
+  }
 }
 
 void CC1101Radio::send_strobe_(uint8_t strobe) {
@@ -93,12 +107,10 @@ void CC1101Radio::send_strobe_(uint8_t strobe) {
 void CC1101Radio::reset() {
   ESP_LOGD(RADIO_TAG, "Resetting CC1101...");
 
-  // Simplified reset - just send the software reset command
-  this->component_->enable();
-  delay(1);
-  this->component_->write_byte(CC1101_SRES);
-  delay(1);
-  this->component_->disable();
+  // Software reset - simpler and works with ESPHome's SPI abstraction
+  // The hardware reset sequence requires direct pin manipulation which
+  // conflicts with ESPHome's SPI driver
+  this->send_strobe_(CC1101_SRES);
   delay(10);  // Give chip time to reset
 
   ESP_LOGD(RADIO_TAG, "CC1101 reset complete");

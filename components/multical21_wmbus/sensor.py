@@ -2,8 +2,10 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import sensor, spi
+from esphome import pins
 from esphome.const import (
     CONF_ID,
+    CONF_NUMBER,
     DEVICE_CLASS_WATER,
     DEVICE_CLASS_TEMPERATURE,
     STATE_CLASS_TOTAL_INCREASING,
@@ -56,7 +58,7 @@ CONFIG_SCHEMA = (
             cv.GenerateID(): cv.declare_id(Multical21WMBusComponent),
             cv.Required(CONF_METER_ID): validate_meter_id,
             cv.Required(CONF_AES_KEY): validate_aes_key,
-            cv.Required(CONF_GDO0_PIN): cv.int_,
+            cv.Required(CONF_GDO0_PIN): pins.gpio_input_pin_schema,
             cv.Optional(CONF_TOTAL_CONSUMPTION): sensor.sensor_schema(
                 unit_of_measurement=UNIT_CUBIC_METER,
                 icon=ICON_WATER,
@@ -110,8 +112,9 @@ async def to_code(config):
     aes_key_array = [int(b) for b in aes_key_bytes]
     cg.add(var.set_aes_key(aes_key_array))
 
-    # Set GDO0 pin
-    cg.add(var.set_gdo0_pin(config[CONF_GDO0_PIN]))
+    # Set GDO0 pin - extract pin number from GPIO config
+    gdo0_pin_num = config[CONF_GDO0_PIN][CONF_NUMBER]
+    cg.add(var.set_gdo0_pin(gdo0_pin_num))
 
     # Register sensors
     if CONF_TOTAL_CONSUMPTION in config:

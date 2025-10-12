@@ -29,7 +29,9 @@ void Multical21WMBusComponent::setup() {
   // Store instance pointer for ISR access
   isr_instance_ = this;
 
-  // Configure GDO0 pin as input with pullup (per ESP32 best practices)
+  // Configure GDO0 pin as input (NO pullup - CC1101 GDO0 is a push-pull output)
+  // Per working reference implementation and CC1101 datasheet:
+  // GDO pins are active outputs and don't need pull-up/pull-down resistors
   pinMode(this->gdo0_pin_, INPUT);
 
   // Attach interrupt handler - FALLING edge triggers when packet reception completes
@@ -133,6 +135,9 @@ bool Multical21WMBusComponent::read_packet_from_fifo_(uint8_t *buffer, uint8_t &
   // Read L-field
   length = this->radio_.read_fifo_byte();
 
+  // Log every packet attempt for debugging
+  ESP_LOGI(TAG, "Packet received: L-field=%u", length);
+
   // Basic sanity check to prevent crazy reads (but still read bytes after)
   if (length < 255 && length > 0) {
     // Store L-field in buffer
@@ -144,6 +149,15 @@ bool Multical21WMBusComponent::read_packet_from_fifo_(uint8_t *buffer, uint8_t &
       buffer[i + 1] = this->radio_.read_fifo_byte();
     }
 
+    // If L-field was larger than MAX_PACKET_SIZE, drain excess bytes
+    if (length > MAX_PACKET_SIZE) {
+      uint8_t excess = length - MAX_PACKET_SIZE;
+      ESP_LOGW(TAG, "Draining %u excess bytes (L-field=%u exceeds MAX=%u)", excess, length, MAX_PACKET_SIZE);
+      for (uint8_t i = 0; i < excess; i++) {
+        this->radio_.read_fifo_byte();
+      }
+    }
+
     // NOW validate the L-field for wMBUS protocol (AFTER reading all bytes)
     if (length < MIN_WMBUS_PACKET_LENGTH || length > MAX_PACKET_SIZE) {
       return false;  // Invalid packet length for wMBUS (but FIFO is already drained)
@@ -152,7 +166,18 @@ bool Multical21WMBusComponent::read_packet_from_fifo_(uint8_t *buffer, uint8_t &
     return true;  // Valid packet
   }
 
-  // Crazy L-field (0 or 255) - FIFO is already drained, just return false
+  // Crazy L-field (0 or 255) - drain what we can from FIFO
+  ESP_LOGW(TAG, "Crazy L-field value: %u, attempting to drain FIFO", length);
+  // Check actual FIFO contents and drain
+  uint8_t rxbytes = this->radio_.get_rx_bytes();
+  uint8_t remaining = (rxbytes & 0x7F);  // Mask off overflow bit
+  // We already read 3 bytes (2 preamble + 1 L-field)
+  if (remaining > 0) {
+    ESP_LOGW(TAG, "Draining %u remaining bytes from FIFO after bad L-field", remaining);
+    for (uint8_t i = 0; i < remaining && i < 64; i++) {  // Safety limit
+      this->radio_.read_fifo_byte();
+    }
+  }
   return false;
 }
 
@@ -163,11 +188,12 @@ bool Multical21WMBusComponent::read_fifo_into_packet_buffer_() {
     return false;
   }
 
-  // Enter IDLE to safely read FIFO
-  this->radio_.enter_idle();
-  delay(2);
+  // CRITICAL: Do NOT enter IDLE before reading FIFO!
+  // The working reference implementation reads FIFO immediately while radio is in RX/RX_END state.
+  // Entering IDLE first can clear the FIFO or reset pointers, losing the packet data.
+  // Reference: esp-multical21/src/WaterMeter.cpp receive() function line 627-704
 
-  // Read packet from FIFO
+  // Read packet from FIFO (while radio is still in RX or RX_END state)
   PacketBuffer pkt;
   uint8_t length;
   if (!this->read_packet_from_fifo_(pkt.data, length)) {
@@ -243,7 +269,7 @@ void Multical21WMBusComponent::loop() {
     return;
   }
 
-  // Detach interrupt during FIFO processing
+  // Detach interrupt during FIFO processing to prevent race conditions
   detachInterrupt(digitalPinToInterrupt(this->gdo0_pin_));
 
   // Clear flag and increment counter
@@ -253,6 +279,7 @@ void Multical21WMBusComponent::loop() {
   // Process the packet
   if (!this->read_fifo_into_packet_buffer_()) {
     this->radio_.start_rx();
+    // Re-attach interrupt before returning
     attachInterrupt(digitalPinToInterrupt(this->gdo0_pin_),
                     []() {
                       if (isr_instance_ != nullptr) {
@@ -265,6 +292,8 @@ void Multical21WMBusComponent::loop() {
 
   // Restart receiver for next packet
   this->radio_.start_rx();
+
+  // Re-attach interrupt
   attachInterrupt(digitalPinToInterrupt(this->gdo0_pin_),
                   []() {
                     if (isr_instance_ != nullptr) {
@@ -388,10 +417,6 @@ void IRAM_ATTR Multical21WMBusComponent::packet_isr_(Multical21WMBusComponent *i
   instance->enable_loop_soon_any_context();
 }
 
-// ============================================================================
-// Packet Processing
-// ============================================================================
-
 void Multical21WMBusComponent::process_packet_(const uint8_t *packet_data,
                                                 uint8_t packet_length) {
   uint8_t length = packet_data[0];
@@ -477,12 +502,27 @@ void Multical21WMBusComponent::log_radio_status_() {
   uint8_t num_bytes = rxbytes & 0x7F;
   bool overflow = rxbytes & 0x80;
 
-  ESP_LOGD(TAG, "Radio status: MARC=0x%02X, RXbytes=%u, overflow=%s, interrupts=%u, ready=%s",
-           marcstate, num_bytes, overflow ? "YES" : "no",
-           this->packets_received_, this->packet_ready_ ? "YES" : "no");
+  // Read RSSI for signal strength
+  uint8_t rssi_raw = this->radio_.read_status_register(0x34);  // RSSI register
+  int16_t rssi_dbm;
+  if (rssi_raw >= 128) {
+    rssi_dbm = (rssi_raw - 256) / 2 - 74;
+  } else {
+    rssi_dbm = rssi_raw / 2 - 74;
+  }
 
-  // Check if radio is in wrong state
-  if (marcstate != MARCSTATE_RX) {
+  ESP_LOGD(TAG, "Radio status: MARC=0x%02X, RXbytes=%u, overflow=%s, interrupts=%u, ready=%s, RSSI=%ddBm",
+           marcstate, num_bytes, overflow ? "YES" : "no",
+           this->packets_received_, this->packet_ready_ ? "YES" : "no", rssi_dbm);
+
+  // Check if radio is in wrong state or overflow
+  if (marcstate == MARCSTATE_RX_OVERFLOW || overflow) {
+    ESP_LOGW(TAG, "Radio in OVERFLOW state (MARC=0x%02X, overflow=%s) - restarting",
+             marcstate, overflow ? "YES" : "no");
+    this->radio_.enter_idle();
+    this->radio_.flush_rx_fifo();
+    this->radio_.start_rx();
+  } else if (marcstate != MARCSTATE_RX) {
     ESP_LOGW(TAG, "Radio not in RX mode (state=0x%02X) - restarting", marcstate);
     this->radio_.start_rx();
   }

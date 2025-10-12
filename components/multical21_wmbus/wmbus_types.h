@@ -45,12 +45,13 @@ constexpr uint8_t CC1101_RSSI = 0x34;       // RSSI value
 constexpr uint8_t CC1101_RXBYTES = 0x3B;    // RX FIFO bytes
 
 // ============================================================================
-// MARCSTATE Values
+// MARCSTATE Values (from CC1101 datasheet Table 31)
 // ============================================================================
 
 constexpr uint8_t MARCSTATE_IDLE = 0x01;
-constexpr uint8_t MARCSTATE_RX = 0x0D;
+constexpr uint8_t MARCSTATE_RX = 0x0F;             // Receiving (correct value)
 constexpr uint8_t MARCSTATE_RXFIFO_OVERFLOW = 0x11;
+constexpr uint8_t MARCSTATE_RX_OVERFLOW = 0x0D;    // RX overflow state
 
 // ============================================================================
 // Read/Write Masks for Register Access

@@ -62,7 +62,7 @@ class Multical21WMBusComponent : public PollingComponent, public spi::SPIDevice<
 
   // Interrupt handling - CRITICAL TIMING PATH
   static void IRAM_ATTR packet_isr_(Multical21WMBusComponent *instance);
-  static Multical21WMBusComponent *isr_instance_;  // Static instance pointer for ISR
+  static Multical21WMBusComponent *isr_instance_;
   volatile bool packet_ready_{false};
 
   // Helper classes (composition)
